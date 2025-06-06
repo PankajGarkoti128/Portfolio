@@ -39,7 +39,14 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 // Prepare and bind
 $stmt = $conn->prepare("INSERT INTO ContactMessages (full_name, email, message) VALUES (?, ?, ?)");
 if (!$stmt) {
-    echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
+    echo json_encode([
+        "success" => false,
+        "message" => "Prepare failed: " . $conn->error,
+        "debug" => [
+            "table_exists" => $conn->query("SHOW TABLES LIKE 'ContactMessages'")->num_rows > 0,
+            "columns" => $conn->query("SHOW COLUMNS FROM ContactMessages")->fetch_all(MYSQLI_ASSOC)
+        ]
+    ]);
     exit();
 }
 $stmt->bind_param("sss", $full_name, $email, $message);
